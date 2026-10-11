@@ -1,0 +1,36 @@
+# Compliance rules this system checks
+
+Checked 11 October 2026. `/compliance` runs every rule below against the records and reports breaches first, then notices filed late, then what falls due in the next 14 days. The rules are the ones a New Zealand company meets under the Companies Act 1993 and an Australian company meets under the Corporations Act 2001. This system records and reminds; it never lodges anything with the Companies Office or ASIC. Nothing here is legal advice: confirm each rule with your adviser, and update this file and the check together when a rule changes.
+
+## New Zealand: Companies Act 1993
+
+| Rule | What the check looks for | Source |
+|---|---|---|
+| **NZ-ANNUAL-RETURN.** Every company files an annual return each year in the month the Registrar has given it, except in the year it was registered (s 214). A company that does not can be removed from the register. | The filing month of this year has passed with no annual return recorded for the year. Due inside the month, breached after it. | [Companies Office: annual returns](https://companies-register.companiesoffice.govt.nz/help-centre/company-annual-returns/why-annual-returns-matter/), Companies Act 1993 s 214 |
+| **NZ-DIRECTOR-NOTICE.** The Registrar hears about a director's appointment, departure or change of details within 20 working days (s 159). | An appointment or departure with no notified date, 20 working days after it happened. | Companies Act 1993 s 159 |
+| **NZ-SHARE-ISSUE-NOTICE.** A share issue is notified to the Registrar within 10 working days (s 43). | A share issue with no notified date, 10 working days after the issue. Transfers go on the next annual return and have no separate notice. | [Companies Office: issuing shares](https://companies-register.companiesoffice.govt.nz/help-centre/shares-and-shareholders/issuing-shares-in-a-company/), Companies Act 1993 s 43 |
+| **NZ-ANNUAL-MEETING.** The board calls an annual meeting no later than 6 months after balance date and 15 months after the last one; the first may wait until 18 months after registration (s 120). A written resolution signed by the shareholders can take its place (s 122). | No annual meeting or annual written resolution recorded since the last balance date, past the earlier of the two limits. | [Companies Office: company meetings](https://companies-register.companiesoffice.govt.nz/help-centre/complying-with-the-law/company-meetings), Companies Act 1993 ss 120, 122 |
+| **NZ-RESIDENT-DIRECTOR.** At least one director lives in New Zealand, or lives in Australia and is a director of an Australian-registered company (s 10(d); Australia is the only enforcement country, Companies Act 1993 Regulations 1994 reg 12). | An active company with no current director who meets the test. Needs each person's country of residence on file. | Companies Act 1993 s 10(d), [Companies Amendment Act 2014](https://legislation.govt.nz/act/public/2014/46/en/latest/) |
+| **NZ-DIRECTOR-CONSENT.** A person is appointed a director only after consenting in writing and certifying they are not disqualified (s 152). | A current director with no consent date, or a consent dated after the appointment. | Companies Act 1993 s 152 |
+
+**Working days.** The New Zealand deadlines count working days: weekdays that are not national public holidays (with Waitangi Day and Anzac Day moved to the Monday when they fall on a weekend), and not 25 December to 2 January. The holidays are in the `cosec.holidays` table for 2025 to 2027; add later years with `/add-holiday`. Some New Zealand statutes close a longer summer period; this system uses the shortest, so a deadline it shows is never later than the law's.
+
+## Australia: Corporations Act 2001
+
+| Rule | What the check looks for | Source |
+|---|---|---|
+| **AU-REVIEW-FEE.** ASIC sends an annual statement on the company's review date (the anniversary of registration). The review fee is due by the date on the statement, usually 2 months after the review date; late fees follow. | No review fee recorded for the year, 2 months after the review date. | [ASIC: company annual review](https://asic.gov.au/for-business-and-companies/companies/company-annual-review/) |
+| **AU-STATEMENT-CHECK.** Details on the annual statement that are wrong are corrected within 28 days of the review date to avoid a late review fee. | No statement check recorded for the year, 28 days after the review date. | [ASIC: annual statements](https://asic.gov.au/for-business/running-a-company/annual-statements/) |
+| **AU-SOLVENCY.** Within 2 months of the review date the directors pass a solvency resolution, unless the company lodged a financial report in the last 12 months (s 347A). A negative resolution, or none at all, is notified to ASIC within 7 days. | No solvency resolution recorded since the review date, 2 months after it. Skipped for a company marked as lodging financial reports. | Corporations Act 2001 s 347A, [ASIC: company annual review](https://asic.gov.au/for-business-and-companies/companies/company-annual-review/) |
+| **AU-OFFICEHOLDER-NOTICE.** ASIC hears about a director's or secretary's appointment, departure or change of details within 28 days (s 205B). A resignation ASIC does not hear about within 28 days only takes effect when it does. | An appointment or departure with no notified date, 28 days after it happened. | Corporations Act 2001 s 205B |
+| **AU-SHARE-NOTICE.** A share issue is notified within 28 days (s 254X), and a proprietary company notifies changes to its members' register within 28 days (s 178A). | A share issue, transfer, buy-back or cancellation with no notified date, 28 days after it. | Corporations Act 2001 ss 178A, 254X |
+| **AU-RESIDENT-DIRECTOR.** A proprietary company has at least one director who ordinarily resides in Australia (s 201A). | An active proprietary company with no current director living in Australia. | Corporations Act 2001 s 201A |
+| **AU-DIRECTOR-ID.** Every director holds a director identification number, applied for before appointment since 5 April 2022 (s 1272C). | A current director of an Australian company with no director ID on file. | Corporations Act 2001 s 1272C, [ASIC: director IDs](https://www.asic.gov.au/for-business-and-companies/companies/company-officeholder-rules-and-changes/director-identification-numbers-director-ids/) |
+| **AU-MINUTES.** Proceedings and resolutions of directors' and members' meetings are recorded in the minute book within one month (s 251A). | A meeting in the last year with no minutes recorded a month after it, or minutes recorded more than a month after it. | [Corporations Act 2001 s 251A](https://www.austlii.edu.au/au/legis/cth/consol_act/ca2001172/s251a.html) |
+
+## Not checked
+
+- Financial statements, audit and the large-company tests (Companies Act 1993 Part 11, Corporations Act Chapter 2M). Your accountant keeps those.
+- Beneficial ownership registers. Neither country runs one for private companies yet; when one starts, add the rule here and the check with `/customise`.
+- Public company annual general meetings in Australia (s 250N, within 5 months of year end). Add it with `/customise` if you look after a public company.
+- Fees. ASIC and the Companies Office change their fees every year: record what you paid with `/file --fee=`, never a figure from this file.

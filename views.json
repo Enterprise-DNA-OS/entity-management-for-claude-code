@@ -2,13 +2,22 @@
   {
     "name": "week",
     "title": "This week",
-    "subtitle": "Entity Management for Claude Code: what needs attention, rendered by npm run view",
+    "subtitle": "Entity Management for Claude Code: what needs a person, rendered by npm run view",
     "sections": [
-      {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
-      }
+      { "title": "Needs attention", "note": "Late notices, missed filings, missing director IDs and consents, minutes not recorded, and what falls due in the next six weeks.",
+        "sql": "select severity, entity, item, finding, rule from cosec.attention order by case severity when 'breached' then 0 when 'late' then 1 when 'due' then 2 else 3 end, sort_on, entity" },
+      { "title": "Changes the registry has not heard about", "sql": "select entity, detail, happened_on, due_on, due_on - current_date as days_left, rule from cosec.notices where notified_on is null order by due_on" },
+      { "title": "By client group", "sql": "select coalesce(e.group_name, '(no group)') as client_group, count(*) as entities, count(f.*) filter (where f.severity = 'breached') as breached, count(f.*) filter (where f.severity <> 'breached') as due_soon from cosec.entities e left join cosec.compliance_findings f on f.entity_id = e.id where e.status = 'active' group by e.group_name order by breached desc, due_soon desc" }
+    ]
+  },
+  {
+    "name": "year",
+    "title": "The yearly cycle",
+    "subtitle": "Annual returns, annual meetings, ASIC reviews and solvency resolutions for every company",
+    "sections": [
+      { "title": "Open and late", "sql": "select entity, jurisdiction as country, item, period, due_on, case when due_on < current_date then 'LATE' when opens_on > current_date then 'not yet' else 'open' end as status, responsible from cosec.annual_items where done_on is null order by due_on" },
+      { "title": "Done this year", "sql": "select entity, item, period, due_on, done_on from cosec.annual_items where done_on is not null order by done_on desc" },
+      { "title": "Directors of Australian companies without a director ID", "sql": "select person, entity, appointed_on from cosec.current_officeholders where jurisdiction = 'AU' and role in ('director', 'alternate-director') and director_id is null order by person" }
     ]
   }
 ]

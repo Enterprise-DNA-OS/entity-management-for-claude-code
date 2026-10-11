@@ -1,11 +1,36 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "register-of-directors",
+    "title": "Register of directors and secretaries",
+    "for_each": "select id, name from cosec.entities where status = 'active' and kind in ('company', 'public-company') order by name",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      { "title": "Company", "sql": "select name as company, jurisdiction as country, company_number as number, incorporated_on, registered_office from cosec.entities where id = $1" },
+      { "title": "Current officeholders", "sql": "select p.name, o.role, o.appointed_on, p.address as residential_address, p.lives_in as country_of_residence, p.director_id from cosec.officeholders o join cosec.parties p on p.id = o.party_id where o.entity_id = $1 and o.ceased_on is null order by o.role, p.name" },
+      { "title": "Former officeholders", "sql": "select p.name, o.role, o.appointed_on, o.ceased_on from cosec.officeholders o join cosec.parties p on p.id = o.party_id where o.entity_id = $1 and o.ceased_on is not null order by o.ceased_on desc" }
+    ]
+  },
+  {
+    "name": "share-register",
+    "title": "Share register",
+    "for_each": "select id, name from cosec.entities where status = 'active' and kind in ('company', 'public-company') order by name",
+    "file": "name",
+    "sections": [
+      { "title": "Company", "sql": "select name as company, jurisdiction as country, company_number as number from cosec.entities where id = $1" },
+      { "title": "Shareholders", "note": "Holdings are the sum of the movements below.", "sql": "select h.holder, h.share_class, h.shares, h.pct_of_class as percent_of_class, p.address from cosec.holdings h join cosec.parties p on p.id = h.party_id where h.entity_id = $1 order by h.share_class, h.shares desc" },
+      { "title": "Issues, transfers, buy-backs and cancellations", "sql": "select m.on_date, m.kind, m.quantity, m.share_class, fp.name as from_holder, tp.name as to_holder, round(m.consideration_cents / 100.0, 2) as consideration from cosec.share_movements m left join cosec.parties fp on fp.id = m.from_party_id left join cosec.parties tp on tp.id = m.to_party_id where m.entity_id = $1 and m.on_date >= current_date - interval '10 years' order by m.on_date, m.kind" }
+    ]
+  },
+  {
+    "name": "compliance-summary",
+    "title": "Company secretarial summary",
+    "for_each": "select id, name from cosec.entities where status = 'active' and kind in ('company', 'public-company') order by name",
+    "file": "name",
+    "sections": [
+      { "title": "Company", "sql": "select name as company, jurisdiction as country, company_number as number, group_name as client_group, responsible as looked_after_by from cosec.entities where id = $1" },
+      { "title": "The yearly cycle", "sql": "select item, period, due_on, coalesce('done ' || done_on, case when due_on < current_date then 'late' else 'open' end) as status from cosec.annual_items where entity_id = $1 order by due_on" },
+      { "title": "Open items", "sql": "select severity, item, finding from cosec.compliance_findings where entity_id = $1 order by sort_on" },
+      { "title": "Recent filings", "sql": "select filed_on, kind, period, reference from cosec.filings where entity_id = $1 order by filed_on desc limit 10" }
     ]
   }
 ]
